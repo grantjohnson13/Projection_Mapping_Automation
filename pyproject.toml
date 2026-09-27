@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "facade-scan"
+version = "0.1.0"
+description = "Structured-light projection mapping for architectural facades"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=1.24",
+    "opencv-contrib-python>=4.8",
+    "shapely>=2.0",
+    "click>=8.1",
+    "pillow>=10.0",
+]
+
+[project.optional-dependencies]
+sam = ["torch>=2.0", "segment-anything>=1.0"]
+gphoto = []
+dev = ["pytest>=7.4", "ruff>=0.5", "mypy>=1.8"]
+
+[project.scripts]
+facade-scan = "facade_scan.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["facade_scan*"]
+
+[tool.setuptools.package-data]
+facade_scan = ["sim/*.toml", "*.toml", "assets/*.png", "assets/*.md"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF"]
+ignore = ["B905", "RUF005", "SIM108"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]
+
+[tool.mypy]
+# Deliberately not pinned with python_version: numpy's bundled stubs use 3.12+
+# syntax, so pinning to 3.11 makes mypy fail inside numpy before it reaches any
+# of our code. Checking against the running interpreter is what we want anyway.
+ignore_missing_imports = true
+warn_unused_ignores = false
+disallow_untyped_defs = false
+check_untyped_defs = true
+strict = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]

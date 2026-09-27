@@ -1,0 +1,51 @@
+# Simulator settings for the tabletop rehearsal rig (facade_scan/sim/tabletop.toml).
+#
+# Geometry chosen in conversation, then checked against the projector's limits:
+#
+#   projector   1280x720, throw ratio 1.5, so a 1.0 m wide image at 1.5 m
+#   camera      1920x1080 webcam, 90 mm to the right of the projector lens
+#   depth step  100 mm, which at 1.5 m is a far harsher test than 1 m at 14 m
+#
+# 1.5 m rather than the 0.9 m ("3 feet") first suggested: most standard
+# projectors cannot focus closer than about 1.2 m, and defocus is the one
+# failure that flattens a scan outright.
+
+[projector]
+width = 1280
+height = 720
+
+[sim]
+# A lit room rather than a blacked-out one -- this is a kitchen test, and the
+# inverse frames should cancel it.
+ambient = 0.10
+noise_sigma = 0.010
+# Projector defocus. At 1.5 m the depth of field has to cover the box front and
+# the backdrop 100 mm behind it, so a little softness is realistic.
+blur_px = 0.7
+lambert = 0.7
+falloff_ref_m = 1.5
+shadows = true
+house_path = "facade_scan/sim/tabletop.toml"
+
+[sim.projector]
+width = 1280
+height = 720
+# Throw ratio 1.5: hfov = 2*atan(1/(2*1.5)) = 36.87 degrees.
+hfov_deg = 36.87
+position = [0.0, 0.0, 0.0]
+target = [0.0, 0.0, 1.5]
+
+[sim.camera]
+width = 1920
+height = 1080
+# Framed a little wider than the projector so the whole lit area is in shot.
+hfov_deg = 42.0
+# 90 mm to the right of the projector lens.
+position = [0.09, 0.0, 0.0]
+target = [0.0, 0.0, 1.5]
+
+[detect]
+# A 1 m target at 1.5 m has much coarser real-world detail than a 9 m facade,
+# and the box has no fine architecture on it at all, so let shorter segments
+# through than the facade defaults allow.
+min_segment_length_frac = 0.012

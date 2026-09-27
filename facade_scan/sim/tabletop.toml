@@ -1,0 +1,78 @@
+# Tabletop rehearsal scene: a cardboard box taped to a wall or fridge.
+#
+# This models the cheap physical test rig, not a house:
+#
+#   - a flat backdrop (wall / white fridge door) 1.5 m from the projector
+#   - a cereal-box-sized carton taped to it, standing 100 mm proud
+#   - a white paper patch and a black paper patch, to exercise the albedo range
+#   - a picture frame, for real specular glass
+#
+# World axes match house.toml: +X right, +Y up, +Z away from the devices. The
+# origin here is the projector, so the backdrop is at z = 1.5 rather than 14.
+#
+# Why this is worth simulating before building it: the depth step is
+# proportionally *much* larger than a real house (100 mm at 1.5 m versus 1 m at
+# 14 m), so the disparity is exaggerated and the decoder is under more strain,
+# not less. If it survives here it will survive a facade.
+
+# --------------------------------------------------------------------------- #
+# Backdrop: the wall or fridge door. Deliberately larger than the projected
+# image so nothing spills off the edge and lands on the floor.
+# --------------------------------------------------------------------------- #
+[[surface]]
+name = "backdrop"
+albedo = 0.72
+polygon = [[-0.70, -0.45, 1.5], [0.70, -0.45, 1.5], [0.70, 0.45, 1.5], [-0.70, 0.45, 1.5]]
+
+# --------------------------------------------------------------------------- #
+# The cardboard box. Placed left of the projector axis so that the camera,
+# sitting 90 mm to the right, can see its right-hand return face -- which is
+# the surface that makes this a genuine two-depth scene rather than two
+# unrelated planes.
+# --------------------------------------------------------------------------- #
+[[surface]]
+name = "box_front"
+albedo = 0.30
+polygon = [[-0.42, -0.16, 1.40], [-0.12, -0.16, 1.40], [-0.12, 0.06, 1.40], [-0.42, 0.06, 1.40]]
+
+[[surface]]
+name = "box_return_right"
+albedo = 0.26
+polygon = [[-0.12, -0.16, 1.40], [-0.12, -0.16, 1.50], [-0.12, 0.06, 1.50], [-0.12, 0.06, 1.40]]
+
+[[surface]]
+name = "box_return_left"
+albedo = 0.26
+polygon = [[-0.42, -0.16, 1.40], [-0.42, -0.16, 1.50], [-0.42, 0.06, 1.50], [-0.42, 0.06, 1.40]]
+
+[[surface]]
+name = "box_top"
+albedo = 0.28
+polygon = [[-0.42, 0.06, 1.40], [-0.12, 0.06, 1.40], [-0.12, 0.06, 1.50], [-0.42, 0.06, 1.50]]
+
+# --------------------------------------------------------------------------- #
+# Albedo test patches, 0.5 mm proud of the backdrop so they occlude it without
+# needing a hole cut. White paper against black paper is a 17:1 reflectance
+# ratio -- far wider than any single exposure could threshold, which is exactly
+# the point the inverse frames exist to prove.
+# --------------------------------------------------------------------------- #
+[[surface]]
+name = "patch_white_paper"
+albedo = 0.85
+polygon = [[0.08, 0.09, 1.4995], [0.22, 0.09, 1.4995], [0.22, 0.20, 1.4995], [0.08, 0.20, 1.4995]]
+
+[[surface]]
+name = "patch_black_paper"
+albedo = 0.05
+polygon = [[0.28, 0.09, 1.4995], [0.42, 0.09, 1.4995], [0.42, 0.20, 1.4995], [0.28, 0.20, 1.4995]]
+
+# --------------------------------------------------------------------------- #
+# A picture frame standing in for a window: specular, mostly transmissive, and
+# throwing glare back at the lens. This is what `likely_glass` should find.
+# --------------------------------------------------------------------------- #
+[[surface]]
+name = "picture_frame_glass"
+albedo = 0.12
+transmission = 0.85
+specular = 0.12
+polygon = [[0.13, -0.17, 1.4990], [0.33, -0.17, 1.4990], [0.33, -0.02, 1.4990], [0.13, -0.02, 1.4990]]

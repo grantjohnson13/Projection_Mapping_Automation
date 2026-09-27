@@ -1,0 +1,118 @@
+# facade-scan configuration.
+#
+# Every value here is a documented default -- this file is a starting point and
+# a reference, not something you must fill in. Delete anything you are happy
+# with; omitted keys keep their defaults. Run `facade-scan <command> -c this.toml`.
+#
+# Full documentation for each setting is in facade_scan/config.py.
+
+[projector]
+# The projector's NATIVE panel resolution, not what your OS is sending it.
+# Patterns must reach the panel unscaled or the finest stripes are resampled
+# away and the low-order bits decode as noise.
+width = 1920
+height = 1080
+
+[display]
+# Which display is the projector. 0 is usually the laptop panel.
+display_index = 1
+# Uncomment if the patterns come up on the wrong screen. These are desktop
+# coordinates of the projector display's top-left corner.
+# origin_x = 1920
+# origin_y = 0
+
+[capture]
+# "webcam", "gphoto2" or "folder". The folder backend always works: project the
+# patterns yourself, photograph them, drop the files in a directory.
+backend = "folder"
+# folder_path = "./photos"
+
+# Milliseconds between putting a frame on the projector and triggering the
+# camera. Covers panel refresh, projector frame interpolation, and exposure.
+settle_ms = 400
+# Frames pulled and discarded before keeping one. OpenCV buffers frames, so a
+# naive read() returns an image of the PREVIOUS pattern. This ruins scans
+# silently. Do not set this to 0 on a webcam.
+flush_frames = 5
+
+# Manual camera control. Any "auto" feature will track the patterns from frame
+# to frame and destroy the pattern-versus-inverse comparison.
+webcam_index = 0
+webcam_disable_auto = true
+webcam_exposure = -6.0          # log2(seconds) on most UVC cameras: -6 is 1/64s
+webcam_wb_temperature = 4600.0
+webcam_focus = 0.0              # 0 is infinity on most UVC cameras
+
+# gphoto2_extra_args = ["--set-config", "iso=400"]
+
+[decode]
+# Per-bit confidence floor, as |pattern - inverse| in normalised intensity.
+# LOWER for dark brick (more coverage, but a scattering of gross errors).
+# RAISE if windows or wet surfaces produce garbage.
+confidence_threshold = 0.06
+# white - black. Below this the projector is not reaching the pixel at all.
+illumination_threshold = 0.08
+
+# Outlier filter. Set median_ksize = 0 to see the raw decode when debugging.
+median_ksize = 5
+median_max_jump_steps = 8.0
+median_replace_px = 2.0
+
+# A bright pixel carrying no pattern modulation is almost certainly glazing.
+glass_confidence_threshold = 0.15
+glass_min_brightness = 0.12
+
+[detect]
+# Length, gap and area thresholds are fractions of the image diagonal, so the
+# same config works on a webcam and a 45 MP DSLR. Set a fraction to 0 to pin
+# the threshold to its absolute pixel value instead.
+min_segment_length_frac = 0.02   # raise to reject more siding/shingle texture
+extend_frac = 0.03               # raise if regions fail to close at corners
+min_region_area_frac = 0.0007
+
+vp_inlier_angle_deg = 2.0
+max_vanishing_points = 3
+merge_angle_deg = 2.5
+merge_gap_frac = 0.02
+
+# Segment Anything is an optional extra (pip install 'facade-scan[sam]').
+# The pipeline produces usable output without it.
+use_sam = false
+
+[transfer]
+# Camera pixels between resampled points along a polygon edge. Straight lines
+# in camera space are not straight in projector space across a depth step.
+densify_step_px = 4.0
+lookup_radius_px = 4
+# Keep the closing kernel below the disparity at your deepest step, or it will
+# weld two surfaces together across the gap between them.
+close_kernel_px = 5
+max_hole_area_px = 2000.0
+
+[preview]
+# "mask", "outline", "fill" or "cycle".
+mode = "mask"
+# Blink period in ms; 0 is steady. A static edge a few pixels off the roofline
+# is hard to see from the driveway. A blinking one is obvious.
+blink_ms = 0
+cycle_dwell_s = 1.5
+
+[sim]
+# The simulator's resolutions are independent of your real projector. What
+# matters is that the camera out-resolves the projector over the facade, as a
+# real DSLR massively does.
+ambient = 0.06                   # projector black level + streetlights + moon
+noise_sigma = 0.008              # about 2/255
+blur_px = 0.5                    # projector defocus, in camera pixels
+shadows = true
+# house_path = "./my_house.toml"
+
+[sim.projector]
+width = 960
+height = 600
+hfov_deg = 43.0
+
+[sim.camera]
+width = 1440
+height = 900
+hfov_deg = 41.5

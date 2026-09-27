@@ -1,0 +1,76 @@
+# Config for the physical tabletop rig on this machine.
+#
+# Hardware, as detected on 2026-09-24:
+#   projector   Optoma 1080P over HDMI, EDID vendor "OTM", 1920x1080 @ 120Hz
+#   camera      "USB Webcam" (UVC), 1920x1080
+#
+# Both are selected BY NAME, not by index. macOS renumbers and rearranges
+# displays whenever one sleeps, and plugging in a phone renumbers every camera.
+# During setup the projector moved from desktop x=857 to x=-2983 between two
+# checks minutes apart, so an index here would be a coin flip.
+
+[projector]
+# NOT the panel's 1920x1080. This is the *pattern* grid: 960x540, blown up 2x
+# with nearest-neighbour onto the 1920x1080 panel (see [display] below).
+#
+# Why: decoding needs the camera to out-resolve the projector by roughly 1.5x.
+# A 1920 webcam framing a 1920 projector gives about 1.0 and the finest Gray
+# planes will not decode. Halving the pattern grid gives 2.0x instead, without
+# scaling the display — every logical pixel becomes a hard-edged 2x2 block, so
+# nothing is resampled and nothing is blurred.
+width = 960
+height = 540
+
+[display]
+# Matched against the EDID vendor code. "OTM" is Optoma.
+display_name = "OTM"
+# The real panel. Patterns are blown up to this before being shown.
+native_width = 1920
+native_height = 1080
+
+[capture]
+backend = "webcam"
+
+# Pinned by INDEX, not name, and verified visually.
+#
+# Do not "fix" this to webcam_name = "USB Webcam". On this machine OpenCV 5's
+# AVFoundation backend does not index cameras in the order AVFoundation reports
+# them: AVFoundation lists [MacBook Pro Camera, USB Webcam, iPhone], but the
+# camera that actually sees the projected image is index 0. Two independent
+# AVFoundation queries agreed on the wrong answer, so the only thing worth
+# trusting is which camera sees the projection -- run `facade-scan check` and
+# look at the lit-area figure.
+webcam_index = 0
+webcam_width = 1920
+webcam_height = 1080
+
+# Manual everything. Auto-exposure will chase the patterns between a frame and
+# its inverse and destroy the only comparison this method makes.
+webcam_disable_auto = true
+webcam_exposure = -6.0
+webcam_focus = 0.0
+webcam_wb_temperature = 4600.0
+
+# At 1.5 m there is no wind and nothing to wait for, so the settle delay only
+# has to cover panel refresh and exposure.
+settle_ms = 250
+# This webcam buffers. Do not lower this without re-testing: a stale frame is a
+# picture of the previous pattern and it ruins the scan silently.
+flush_frames = 6
+
+[decode]
+# Brown corrugated cardboard is about 0.3 albedo and the projector is close, so
+# there should be plenty of signal. If coverage comes out low, expose longer
+# before touching this.
+confidence_threshold = 0.06
+
+[detect]
+# A cardboard box has far less fine detail than a facade, and the target is
+# only about a metre across, so let shorter segments through.
+min_segment_length_frac = 0.012
+
+[preview]
+# Blink the result back at the target. A static edge a few pixels off is hard
+# to judge by eye; a blinking one is obvious.
+mode = "outline"
+blink_ms = 500

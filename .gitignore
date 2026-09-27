@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Scan output: captures are large and regenerable, results are per-site.
+scan/
+patterns/
+*.npz
+
+# Test runs. The structure is documented and tracked; the contents are not,
+# because a single run is hundreds of megabytes of captures.
+results/*
+!results/.gitkeep
+!results/README.md
+
+# Audio assets. Music you supply is yours and usually licensed to you
+# personally -- it does not belong in the repository. Keep the folder, ignore
+# what is in it.
+assets/audio/*
+!assets/audio/README.md

@@ -1,0 +1,133 @@
+# Synthetic house geometry for the facade-scan simulator.
+#
+# World axes: +X right, +Y up (0 = ground), +Z away from the projector.
+# All units are metres. The projector and camera sit near the origin looking
+# toward +Z; the main facade is 14 m away.
+#
+# Every surface is a planar polygon given as a list of [x, y, z] vertices.
+# `holes` cuts coplanar openings out of a surface -- that is how a recessed
+# window works: the facade has a rectangular hole and a separate pane polygon
+# sits 200 mm behind it. Recessed panes are made 60 mm larger than their hole
+# on each side so the reveal cannot leak background through the gap.
+#
+# Depth layers, nearest to furthest:
+#   13.00  garage bump-out front face and its gable
+#   13.12  recessed garage door
+#   13.70  eave soffit leading edge
+#   14.00  main facade, main gable
+#   14.20  recessed window panes
+#   14.12  recessed front door
+
+# --------------------------------------------------------------------------- #
+# Main facade, with openings for five windows and the front door
+# --------------------------------------------------------------------------- #
+[[surface]]
+name = "main_facade"
+albedo = 0.55
+polygon = [[-4.5, 0.0, 14.0], [4.5, 0.0, 14.0], [4.5, 4.4, 14.0], [-4.5, 4.4, 14.0]]
+holes = [
+  [[-3.95, 1.0, 14.0], [-2.75, 1.0, 14.0], [-2.75, 2.6, 14.0], [-3.95, 2.6, 14.0]],
+  [[-2.15, 1.0, 14.0], [-0.95, 1.0, 14.0], [-0.95, 2.6, 14.0], [-2.15, 2.6, 14.0]],
+  [[-0.15, 0.05, 14.0], [0.85, 0.05, 14.0], [0.85, 2.30, 14.0], [-0.15, 2.30, 14.0]],
+  [[-3.60, 3.0, 14.0], [-2.50, 3.0, 14.0], [-2.50, 4.0, 14.0], [-3.60, 4.0, 14.0]],
+  [[-1.40, 3.0, 14.0], [-0.30, 3.0, 14.0], [-0.30, 4.0, 14.0], [-1.40, 4.0, 14.0]],
+  [[0.80, 3.0, 14.0], [1.90, 3.0, 14.0], [1.90, 4.0, 14.0], [0.80, 4.0, 14.0]],
+]
+
+# --------------------------------------------------------------------------- #
+# Recessed glazing. Low albedo and, in the real world, specular and partly
+# transparent -- which is exactly why these decode badly and why the decoder
+# exposes a `likely_glass` mask.
+# --------------------------------------------------------------------------- #
+[[surface]]
+name = "window_lower_left"
+albedo = 0.22
+transmission = 0.85
+specular = 0.10
+polygon = [[-4.01, 0.94, 14.2], [-2.69, 0.94, 14.2], [-2.69, 2.66, 14.2], [-4.01, 2.66, 14.2]]
+
+[[surface]]
+name = "window_lower_mid"
+albedo = 0.22
+transmission = 0.85
+specular = 0.10
+polygon = [[-2.21, 0.94, 14.2], [-0.89, 0.94, 14.2], [-0.89, 2.66, 14.2], [-2.21, 2.66, 14.2]]
+
+[[surface]]
+name = "window_upper_left"
+albedo = 0.22
+transmission = 0.85
+specular = 0.10
+polygon = [[-3.66, 2.94, 14.2], [-2.44, 2.94, 14.2], [-2.44, 4.06, 14.2], [-3.66, 4.06, 14.2]]
+
+[[surface]]
+name = "window_upper_mid"
+albedo = 0.22
+transmission = 0.85
+specular = 0.10
+polygon = [[-1.46, 2.94, 14.2], [-0.24, 2.94, 14.2], [-0.24, 4.06, 14.2], [-1.46, 4.06, 14.2]]
+
+[[surface]]
+name = "window_upper_right"
+albedo = 0.22
+transmission = 0.85
+specular = 0.10
+polygon = [[0.74, 2.94, 14.2], [1.96, 2.94, 14.2], [1.96, 4.06, 14.2], [0.74, 4.06, 14.2]]
+
+[[surface]]
+name = "front_door"
+albedo = 0.38
+polygon = [[-0.21, 0.02, 14.12], [0.91, 0.02, 14.12], [0.91, 2.36, 14.12], [-0.21, 2.36, 14.12]]
+
+# --------------------------------------------------------------------------- #
+# Garage bump-out: one metre proud of the main facade. This is the feature that
+# makes a single homography impossible and that casts a real projector shadow
+# onto the facade beside it.
+# --------------------------------------------------------------------------- #
+[[surface]]
+name = "garage_face"
+albedo = 0.62
+polygon = [[1.4, 0.0, 13.0], [4.3, 0.0, 13.0], [4.3, 2.7, 13.0], [1.4, 2.7, 13.0]]
+holes = [
+  [[1.65, 0.12, 13.0], [4.05, 0.12, 13.0], [4.05, 2.35, 13.0], [1.65, 2.35, 13.0]],
+]
+
+[[surface]]
+name = "garage_door"
+albedo = 0.45
+polygon = [[1.59, 0.06, 13.12], [4.11, 0.06, 13.12], [4.11, 2.41, 13.12], [1.59, 2.41, 13.12]]
+
+[[surface]]
+name = "garage_return_left"
+albedo = 0.50
+polygon = [[1.4, 0.0, 13.0], [1.4, 2.7, 13.0], [1.4, 2.7, 14.0], [1.4, 0.0, 14.0]]
+
+[[surface]]
+name = "garage_return_right"
+albedo = 0.50
+polygon = [[4.3, 0.0, 13.0], [4.3, 2.7, 13.0], [4.3, 2.7, 14.0], [4.3, 0.0, 14.0]]
+
+[[surface]]
+name = "garage_roof"
+albedo = 0.52
+polygon = [[1.4, 2.7, 13.0], [4.3, 2.7, 13.0], [4.3, 2.7, 14.0], [1.4, 2.7, 14.0]]
+
+# --------------------------------------------------------------------------- #
+# Gables and eave
+# --------------------------------------------------------------------------- #
+[[surface]]
+name = "gable_main"
+albedo = 0.58
+polygon = [[-4.5, 4.4, 14.0], [4.5, 4.4, 14.0], [0.0, 5.85, 14.0]]
+
+[[surface]]
+name = "gable_garage"
+albedo = 0.60
+polygon = [[1.4, 2.7, 13.0], [4.3, 2.7, 13.0], [2.85, 3.9, 13.0]]
+
+# Underside of the main roof overhang: 300 mm proud of the facade, so it casts
+# a thin hard shadow line across the top of the wall.
+[[surface]]
+name = "eave_soffit"
+albedo = 0.78
+polygon = [[-4.5, 4.4, 13.7], [4.5, 4.4, 13.7], [4.5, 4.4, 14.0], [-4.5, 4.4, 14.0]]
