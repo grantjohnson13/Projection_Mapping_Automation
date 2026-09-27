@@ -29,6 +29,7 @@ import subprocess
 import tempfile
 import wave
 from dataclasses import dataclass, field
+from itertools import pairwise
 from pathlib import Path
 
 import numpy as np
@@ -343,7 +344,7 @@ def find_sections(magnitude: np.ndarray, frame_rate: float,
     # that a change of note does not read as a change of section.
     edges = np.geomspace(1, magnitude.shape[1], 13).astype(int)
     bands = np.stack([magnitude[:, a:max(b, a + 1)].mean(axis=1)
-                      for a, b in zip(edges[:-1], edges[1:])], axis=-1)
+                      for a, b in pairwise(edges)], axis=-1)
     bands = np.log1p(bands)
     bands /= np.maximum(np.linalg.norm(bands, axis=1, keepdims=True), 1e-9)
 

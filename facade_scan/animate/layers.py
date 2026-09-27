@@ -19,6 +19,7 @@ frame is lit rather than by how pale it is.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from itertools import pairwise
 from pathlib import Path
 
 import numpy as np
@@ -126,13 +127,15 @@ def find_zones(mask: np.ndarray, min_width_frac: float = 0.12) -> list[tuple[int
     dividers: list[int] = []
     for i in range(guard, span - guard):
         lo, hi = max(i - guard, 0), min(i + guard + 1, span)
-        # A valley: the roof is at its lowest here relative to its neighbours.
-        if smooth[i] == smooth[lo:hi].max() and smooth[i] > smooth[lo:hi].min() + 1.0:
-            if all(abs(i - d) >= guard for d in dividers):
-                dividers.append(i)
+        # A valley: the roof is at its lowest here relative to its neighbours,
+        # and far enough from the ones already found to be a separate mass.
+        if (smooth[i] == smooth[lo:hi].max()
+                and smooth[i] > smooth[lo:hi].min() + 1.0
+                and all(abs(i - d) >= guard for d in dividers)):
+            dividers.append(i)
 
     edges = [0] + sorted(dividers) + [span]
-    return [(left + a, left + b) for a, b in zip(edges[:-1], edges[1:]) if b > a]
+    return [(left + a, left + b) for a, b in pairwise(edges) if b > a]
 
 
 def verge_points(mask: np.ndarray, count: int, tolerance: float = 3.0) -> np.ndarray:
@@ -369,7 +372,7 @@ class Layers:
         # to the song rather than to a hand-written cue sheet.
         edges = list(self.audio.sections) + [self.audio.duration]
         levels = []
-        for start, end in zip(edges[:-1], edges[1:]):
+        for start, end in pairwise(edges):
             lo = int(max(0.0, start - self.audio.frame_offset) * self.audio.frame_rate)
             hi = int(max(0.0, end - self.audio.frame_offset) * self.audio.frame_rate)
             chunk = self.audio.energy[lo:max(hi, lo + 1)]
